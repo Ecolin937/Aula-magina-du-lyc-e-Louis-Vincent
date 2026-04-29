@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Notes } from './components/Notes';
 import { Clock } from './components/Clock';
+import { TopClock } from './components/TopClock';
 import { ClassPlan } from './components/ClassPlan';
 import { Attendance } from './components/Attendance';
 import { MusicPlayer } from './components/MusicPlayer';
@@ -38,28 +39,44 @@ export default function App() {
     'LEO', 'SAFAE', 'SACHA', 'LIVIA', 'MILO', 'CELIA', 'SAMUEL', 'LEONIE'
   ];
 
+  const class51011Students = [
+    'LOUNA', 'AXEL', 'LEO', 'TESSA', 'BASILE', 'HUGO', 'TOM', 'AVA',
+    'MELISSA', 'MEHDI', 'SARAH', 'MAHAUT', 'ILAN', 'PAUL L', 'LEON', 'ALEXIS',
+    'MAEL', 'AMELIE', 'PAUL C', 'PIERRE', 'EMMA', 'JULIETTE', 'CLEA', 'LOLA'
+  ];
+
   const [allStudents, setAllStudents] = useState<{ [key: string]: string[] }>(() => {
     const saved = localStorage.getItem('aula-magica-all-students');
     const defaultState = {
-      '50407': [],
-      'E316': b1Students,
-      'E110': b1Students,
-      'Clase C': [],
+      '50407': class51011Students,
+      '51011-E316': class51011Students,
+      '51011-E110': class51011Students,
       'Clase D': []
     };
     
     if (saved) {
       const parsed = JSON.parse(saved);
-      // If E316 or E110 exists but is empty, we populate it with defaults to help the user
-      if (parsed['E316'] && parsed['E316'].length === 0) {
-        parsed['E316'] = b1Students;
+      // Migration: if old keys exist, move them to new keys
+      if (parsed['E316']) parsed['50407'] = parsed['E316'];
+      if (parsed['E110']) parsed['51011-E316'] = parsed['E110'];
+      if (parsed['Clase C']) parsed['51011-E110'] = parsed['Clase C'];
+      if (parsed['50407-E316']) parsed['50407'] = parsed['50407-E316'];
+      if (parsed['50407-E110']) parsed['51011-E316'] = parsed['50407-E110'];
+      if (parsed['51011']) parsed['51011-E110'] = parsed['51011'];
+
+      // If keys exist but are empty, we populate it with defaults to help the user
+      if (parsed['50407'] && parsed['50407'].length === 0) {
+        parsed['50407'] = class51011Students;
       }
-      if (parsed['E110'] && parsed['E110'].length === 0) {
-        parsed['E110'] = b1Students;
+      if (parsed['51011-E316'] && parsed['51011-E316'].length === 0) {
+        parsed['51011-E316'] = class51011Students;
       }
-      // Force sync E316 and E110 on load
-      if (parsed['E316']) {
-        parsed['E110'] = parsed['E316'];
+      if (parsed['51011-E110'] && parsed['51011-E110'].length === 0) {
+        parsed['51011-E110'] = class51011Students;
+      }
+      // Force sync 50407 and 51011-E316 on load
+      if (parsed['50407']) {
+        parsed['51011-E316'] = parsed['50407'];
       }
       return { ...defaultState, ...parsed };
     }
@@ -69,31 +86,41 @@ export default function App() {
   const [allScores, setAllScores] = useState<{ [key: string]: StudentScore[] }>(() => {
     const saved = localStorage.getItem('aula-magica-all-scores');
     const defaultScores = {
-      '50407': [],
-      'E316': b1Students.map(name => ({ name, points: 0 })),
-      'E110': b1Students.map(name => ({ name, points: 0 })),
-      'Clase C': [],
+      '50407': class51011Students.map(name => ({ name, points: 0 })),
+      '51011-E316': class51011Students.map(name => ({ name, points: 0 })),
+      '51011-E110': class51011Students.map(name => ({ name, points: 0 })),
       'Clase D': []
     };
 
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed['E316'] && parsed['E316'].length === 0) {
-        parsed['E316'] = b1Students.map(name => ({ name, points: 0 }));
+      // Migration
+      if (parsed['E316']) parsed['50407'] = parsed['E316'];
+      if (parsed['E110']) parsed['51011-E316'] = parsed['E110'];
+      if (parsed['Clase C']) parsed['51011-E110'] = parsed['Clase C'];
+      if (parsed['50407-E316']) parsed['50407'] = parsed['50407-E316'];
+      if (parsed['50407-E110']) parsed['51011-E316'] = parsed['50407-E110'];
+      if (parsed['51011']) parsed['51011-E110'] = parsed['51011'];
+
+      if (parsed['50407'] && parsed['50407'].length === 0) {
+        parsed['50407'] = class51011Students.map(name => ({ name, points: 0 }));
       }
-      if (parsed['E110'] && parsed['E110'].length === 0) {
-        parsed['E110'] = b1Students.map(name => ({ name, points: 0 }));
+      if (parsed['51011-E316'] && parsed['51011-E316'].length === 0) {
+        parsed['51011-E316'] = class51011Students.map(name => ({ name, points: 0 }));
       }
-      // Force sync E316 and E110 scores on load
-      if (parsed['E316']) {
-        parsed['E110'] = parsed['E316'];
+      if (parsed['51011-E110'] && parsed['51011-E110'].length === 0) {
+        parsed['51011-E110'] = class51011Students.map(name => ({ name, points: 0 }));
+      }
+      // Force sync 50407 and 51011-E316 scores on load
+      if (parsed['50407']) {
+        parsed['51011-E316'] = parsed['50407'];
       }
       return { ...defaultScores, ...parsed };
     }
     return defaultScores;
   });
 
-  const effectiveClass = activeClass === 'E110' ? 'E316' : activeClass;
+  const effectiveClass = activeClass === '51011-E316' ? '50407' : activeClass;
   const students = allStudents[effectiveClass] || [];
   const scores = allScores[effectiveClass] || [];
 
@@ -111,9 +138,9 @@ export default function App() {
       
       setAllScores(prev => {
         const newState = { ...prev, [effectiveClass]: updatedScores };
-        // If we are updating E316, also update E110 to keep them in sync in the state object
-        if (effectiveClass === 'E316') {
-          newState['E110'] = updatedScores;
+        // If we are updating 50407, also update 51011-E316 to keep them in sync in the state object
+        if (effectiveClass === '50407') {
+          newState['51011-E316'] = updatedScores;
         }
         return newState;
       });
@@ -132,8 +159,8 @@ export default function App() {
       );
       
       const newState = { ...prev, [effectiveClass]: updatedScores };
-      if (effectiveClass === 'E316') {
-        newState['E110'] = updatedScores;
+      if (effectiveClass === '50407') {
+        newState['51011-E316'] = updatedScores;
       }
       return newState;
     });
@@ -151,8 +178,8 @@ export default function App() {
       const updatedScores = currentScores.map(s => ({ ...s, points: 0 }));
       
       const newState = { ...prev, [effectiveClass]: updatedScores };
-      if (effectiveClass === 'E316') {
-        newState['E110'] = updatedScores;
+      if (effectiveClass === '50407') {
+        newState['51011-E316'] = updatedScores;
       }
       return newState;
     });
@@ -165,8 +192,8 @@ export default function App() {
       const updatedList = typeof newStudents === 'function' ? newStudents(currentList) : newStudents;
       
       const newState = { ...prev, [effectiveClass]: updatedList };
-      if (effectiveClass === 'E316') {
-        newState['E110'] = updatedList;
+      if (effectiveClass === '50407') {
+        newState['51011-E316'] = updatedList;
       }
       
       localStorage.setItem('aula-magica-all-students', JSON.stringify(newState));
@@ -190,8 +217,9 @@ export default function App() {
   }, []);
 
   const classRooms: { [key: string]: string } = {
-    'E316': 'E316',
-    'E110': 'E110'
+    '50407': 'E316',
+    '51011-E316': 'E110',
+    '51011-E110': 'C'
   };
 
   return (
@@ -200,7 +228,10 @@ export default function App() {
       
       {/* Top Utility Bar */}
       <div className="bg-indigo-600 text-white py-2 px-4">
-        <div className="max-w-7xl mx-auto flex justify-end">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <TopClock />
+          </div>
           <Button
             variant="ghost"
             size="sm"
@@ -217,27 +248,24 @@ export default function App() {
       <header className="border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-auto py-4 sm:h-16 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center justify-between w-full sm:w-auto">
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 shrink-0">
-                <GraduationCap className="text-white w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="font-bold text-xl tracking-tight text-slate-900">Aula Mágica</h1>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-indigo-500 leading-none">Toolkit para Profes</p>
-              </div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 shrink-0">
+              <GraduationCap className="text-white w-6 h-6" />
             </div>
-            
-            <div className="sm:hidden">
-              <Clock />
+            <div>
+              <h1 className="font-bold text-xl tracking-tight text-slate-900">Aula Mágica</h1>
+              <p className="text-[10px] uppercase tracking-widest font-bold text-indigo-500 leading-none">Toolkit para Profes</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
-            <div className="hidden sm:block">
-              <Clock />
-            </div>
-            <div className="flex bg-slate-100 p-1 rounded-xl shrink-0">
-              {['50407', 'E316', 'E110', 'Clase C', 'Clase D'].map((cls) => (
+          <div className="hidden sm:block">
+            {/* Clock moved to top bar */}
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
+          <div className="flex bg-slate-100 p-1 rounded-xl shrink-0">
+              {['50407', '51011-E316', '51011-E110', 'Clase D'].map((cls) => (
                 <button
                   key={cls}
                   onClick={() => setActiveClass(cls)}
@@ -290,7 +318,7 @@ export default function App() {
                     <Trophy className="w-4 h-4" />
                     <span className="whitespace-nowrap">Puntos</span>
                   </TabsTrigger>
-                  {(activeClass === 'E316' || activeClass === 'E110') && (
+                  {(activeClass === '50407' || activeClass === '51011-E316' || activeClass === '51011-E110') && (
                     <TabsTrigger value="plan" className="rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2 px-4">
                       <BookOpen className="w-4 h-4" />
                       <span className="whitespace-nowrap">Plano</span>
@@ -365,7 +393,7 @@ export default function App() {
                   </motion.div>
                 </TabsContent>
 
-                {(activeClass === 'E316' || activeClass === 'E110') && (
+                {(activeClass === '50407' || activeClass === '51011-E316' || activeClass === '51011-E110') && (
                   <TabsContent value="plan" className="mt-0 focus-visible:outline-none">
                     <motion.div
                       initial={{ opacity: 0, x: 20 }}

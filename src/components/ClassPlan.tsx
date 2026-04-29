@@ -19,38 +19,54 @@ export function ClassPlan({ updatePoints, activeClass, room }: ClassPlanProps) {
 
   // Seating chart data for E316 (Clase B1)
   const tablesE316: TableData[] = [
-    { students: ['NOLAN', 'MOHAMED'] },
-    { students: ['CHARLINE', 'GABIN'] },
-    { students: ['LUCAS', 'EVAN'] },
-    { students: ['LENAICK', 'LEA'] },
-    { students: ['NOA', 'HADRIEN'] },
-    { students: ['MARCO', 'NATHAN'] },
-    { students: ['NAEL', 'MATIS'] },
-    { students: ['INAYA', 'LOLA'] },
-    { students: ['LEO', 'SAFAE'] },
-    { students: ['SACHA', 'LIVIA'] },
-    { students: ['MILO', 'CELIA'] },
-    { students: ['SAMUEL', 'LEONIE'] },
+    { students: ['LOUNA', 'AXEL'] },
+    { students: ['LEO', 'TESSA'] },
+    { students: ['BASILE', 'HUGO'] },
+    { students: ['TOM', 'AVA'] },
+    { students: ['MELISSA', 'MEHDI'] },
+    { students: ['SARAH', 'MAHAUT'] },
+    { students: ['ILAN', 'PAUL L'] },
+    { students: ['LEON', 'ALEXIS'] },
+    { students: ['MAEL', 'AMELIE'] },
+    { students: ['PAUL C', 'PIERRE'] },
+    { students: ['EMMA', 'JULIETTE'] },
+    { students: ['CLEA', 'LOLA'] },
   ];
 
   // Seating chart data for E110 (Clase B2) based on the provided image
   const tablesE110: TableData[] = [
-    { students: ['NOLAN', 'MOHAMED'] },
-    { students: ['CHARLINE', 'GABIN'] },
-    { students: ['LUCAS', 'EVAN'] },
-    { students: ['LENAICK', 'LEA'] },
-    { students: ['NOA', 'HADRIEN'] },
-    { students: ['MARCO', 'NATHAN'] },
-    { students: ['NAEL', 'MATIS'] },
-    { students: ['INAYA', 'LOLA'] },
-    { students: ['LEO', 'SAFAE'] },
-    { students: ['SACHA', 'LIVIA'] },
-    { students: ['MILO', 'CELIA'] },
-    { students: ['SAMUEL', 'LEONIE'] },
+    { students: ['LOUNA', 'AXEL'] },
+    { students: ['LEO', 'TESSA'] },
+    { students: ['BASILE', 'HUGO'] },
+    { students: ['TOM', 'AVA'] },
+    { students: ['MELISSA', 'MEHDI'] },
+    { students: ['SARAH', 'MAHAUT'] },
+    { students: ['ILAN', 'PAUL L'] },
+    { students: ['LEON', 'ALEXIS'] },
+    { students: ['MAEL', 'AMELIE'] },
+    { students: ['PAUL C', 'PIERRE'] },
+    { students: ['EMMA', 'JULIETTE'] },
+    { students: ['CLEA', 'LOLA'] },
   ];
 
-  const tables = room === 'E110' ? tablesE110 : tablesE316;
-  const gridCols = room === 'E110' ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-4';
+  // Seating chart data for 51011 based on the provided image
+  const tables51011: TableData[] = [
+    { students: ['LOUNA', 'AXEL'] },
+    { students: ['LEO', 'TESSA'] },
+    { students: ['BASILE', 'HUGO'] },
+    { students: ['TOM', 'AVA'] },
+    { students: ['MELISSA', 'MEHDI'] },
+    { students: ['SARAH', 'MAHAUT'] },
+    { students: ['ILAN', 'PAUL L'] },
+    { students: ['LEON', 'ALEXIS'] },
+    { students: ['MAEL', 'AMELIE'] },
+    { students: ['PAUL C', 'PIERRE'] },
+    { students: ['EMMA', 'JULIETTE'] },
+    { students: ['CLEA', 'LOLA'] },
+  ];
+
+  const tables = activeClass === '51011-E110' ? tables51011 : (room === 'E110' ? tablesE110 : tablesE316);
+  const gridCols = (room === 'E110' || activeClass === '51011-E110') ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-4';
 
   const handlePoint = (names: string[]) => {
     names.forEach(name => updatePoints(name, 1));
